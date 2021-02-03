@@ -17,10 +17,8 @@ var VSHADER_SOURCE =
     '}\n';
 // 片元着色器程序
 var FSHADER_SOURCE = 'void main(){\n' +
-    'gl_FragColor=vec4(1.0,1.0,0.0,1.0);\n' + //设置颜色
+    'gl_FragColor=vec4(1.0,1.0,0.0,1.0);\n' + // 设置颜色
     '}\n';
-
-
 
 function main() {
     // 获取canvas
@@ -66,9 +64,22 @@ function main() {
      *      v0                  指定填充attribute变量第一个分量的值
      *      v1                  指定填充attribute变量第二个分量的值
      *      v2                  指定填充attribute变量第三个分量的值
-    */
+     * 同族函数：
+     * gl.vertexAttrib3f(location,v0);
+     * gl.vertexAttrib3f(location,v0,v1);
+     * gl.vertexAttrib3f(location,v0,v1,v2);
+     * gl.vertexAttrib3f(location,v0,v1,v2,v3);
+     * gl.vertexAttrib3f(location,v0,v1,v2,v3,v4); 忽略得v1,v2,v3将被填充为0.0，v4将被填充为1.0
+     * 矢量版本：
+     * var position = new Float32Array([1.0, 2.0, 3.0, 1.0]) // 类型化数组
+     * gl.vertexAttrib4fv(a_Position,position);              // 末尾接v的表示可以接收数组为参数，数字表示数组的长度
+     * 
+     * 函数命名规范：
+     * <基础函数名>    <参数个数>   <参数类型>
+     * vertexAttrib       4         f(float)
+    */ 
 
-    // 将顶点位置传输给attribute变量 
+    // 将顶点位置传输给attribute变量 a_Position是一个vec4四个浮点类型得矢量，这里只传入了三个，第四个分量则默认为1.0，是一个不安全得第四分量
     gl.vertexAttrib3f(a_Position, 0.5, 0.5, 0.0);
 
     // 指定清空绘图区的颜色
