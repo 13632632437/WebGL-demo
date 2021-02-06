@@ -36,7 +36,7 @@ function main() {
         return
     }
     // 1. 声明类型化数组
-    var position = new Float32Array([-1.0, 1.0, 0.0, 1.0]);
+    // var position = new Float32Array([-1.0, 1.0, 0.0, 1.0]);
     // 2. 传输数据
     gl.vertexAttrib1f(a_PointSize, 10);
 
