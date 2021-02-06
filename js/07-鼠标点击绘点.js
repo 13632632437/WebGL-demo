@@ -75,14 +75,13 @@ function click(e, gl, canvas, a_Position) {
     x = ((x - rect.left) - canvas[0].width / 2) / (canvas[0].width / 2);
     y = ((canvas[0].height / 2) - (y - rect.top)) / (canvas[0].height / 2);
     // 按顺序将点添加到数组中
-    g_points.push(x);
-    g_points.push(y);
+    g_points.push([x, y]);
     // 清空绘图区
     gl.clear(gl.COLOR_BUFFER_BIT);
     // 遍历数组绘制点
     for (let i = 0; i < g_points.length; i += 2) {
         // 将值传输到attribute变量
-        gl.vertexAttrib3f(a_Position, g_points[i], g_points[i + 1], 0.0);
+        gl.vertexAttrib3f(a_Position, g_points[i][0], g_points[i][1], 0.0);
         // 绘制点
         gl.drawArrays(gl.POINTS, 0, 1);
     }
