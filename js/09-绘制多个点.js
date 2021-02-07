@@ -3,7 +3,7 @@ var VSHADER_SOURCE =
     'attribute vec4 a_Position;' +  // 声明点位置attribute变量
     'void main() {' +
     'gl_Position = a_Position;' +   // 使用变量
-    'gl_PointSize = 10.0;' +  // 使用变量
+    'gl_PointSize = 10.0;' +
     '}'
 // 声明片元着色器
 var FSHADER_SOURCE =
@@ -124,3 +124,5 @@ function initVertexBuffers(gl) {
  *          参数：
  *                  location    指定attribute变量的存储位置
  */
+
+// ul>li.item$@*5
