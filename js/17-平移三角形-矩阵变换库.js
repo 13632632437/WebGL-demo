@@ -1,48 +1,23 @@
+/**
+ * 平移变换矩阵
+ *   1  0  0  Tx
+ *   0  1  0  Ty
+ *   0  0  1  0
+ *   0  0  0  1
+ */
 
-/**
- * 缩放后的坐标x',y'计算公式
- * x' = Sx * x
- * y' = Sy * y
- * z' = Sz * z
- */
-/**
- * 旋转变换矩阵
- *  x' = Sx * x
- *  y' = Sy * y
- *  z' = Sz * z
- *  1  = 1;
- * 
- *  矩阵
- *      x'       a  b  c  d       x
- *      y'  =    e  f  g  h   *   y
- *      z'       i  j  k  l       z
- *      1        m  n  o  p       1
- * 
- *      x' = ax + by + cz + d   a=Sx;b=0;c=0;d=0;
- *      y' = ex + fy + gz + h   e=0;f=Sy;g=0;h=0;
- *      z' = ix + jy + kz + l   i=0;j=0;k=Sz;l=0;
- *      1  = mx + ny + oz + p   m=0;n=0;o=0;p=1;
- * 则矩阵为
- *      Sx  0   0   0
- *      0   Sy  0   0
- *      0   0   Sz   0
- *      0   0   0   1
- */
 // 声明顶点着色器
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;' +
-    'uniform mat4 u_xformMatrix;' +  // 声明旋转矩阵变量
+    'uniform mat4 u_xformMatrix;' +   // 声明变换矩阵
     'void main() {' +
-    'gl_Position = u_xformMatrix * a_Position;' + // 使用旋转矩阵，注意顺序
+    'gl_Position = u_xformMatrix * a_Position;' +  // 使用变换矩阵，注意顺序
     '}'
 // 声明片元着色器
 var FSHADER_SOURCE =
     'void main() {' +
     ' gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);' +
     '}'
-
-// 旋转角度
-var ANGLE = 90.0;
 
 // 主程序
 function main() {
@@ -64,32 +39,29 @@ function main() {
         console.log("设置顶点位置信息失败");
         return
     }
-    /**
-     * 获的旋转角度的正弦值和余弦值
-     * 先将角度转为弧度制
-     * 获取旋转矩阵的存储地址
-     * 向变量传递数据
-     */
-    var radian = Math.PI * ANGLE / 180;
-    var sinB = Math.sin(radian);
-    var cosB = Math.cos(radian);
-    // 声明旋转矩阵,注意按列主序
-    var xformMatrix = new Float32Array([
-        2, 0, 0, 0,
-        0, 2, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1
-    ])
-    // 获取旋转矩阵变量的存储地址
+    // 获取平移变换矩阵变量的存储地址
     var u_xformMatrix = gl.getUniformLocation(gl.program, 'u_xformMatrix');
-    // 向旋转矩阵复制
-    gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
+    // 使用Matrix4对象
+    var xformMatrix = new Matrix4();
+    // 将xformMatrix设置为平移矩阵
+    xformMatrix.setTranslate(0.5, 0.5, 0)
+    // 使用平移矩阵对三角形进行平移,注意：不能直接将Matrix4对象直接作为最后一个参数传入，因为该方法的最后一个参数必须是类型化数组，应当使用Matrix4对象的elements属性访问存储矩阵元素的类型化数组
+    gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix.elements);
+    /**
+     * gl.uniformMatrix4fv(location, Transpose, array); 4阶矩阵，v表示向着色器传递多个数据值
+     *  参数： 
+     *  location    uniform变量的存储位置
+     *  Transpose   默认为false,是否转置矩阵，即交换矩阵的行和列，在WebGL没有实现矩阵转置，所以为false
+     *  array       待传输的类型化数组，4*4矩阵按列主序存储在其中
+     * 
+    */
+
     // 4. 设置背景色
     gl.clearColor(1.0, 0.0, 0.0, 1.0);
     // 5. 清空
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.clear(gl.COLOR_BUFFER_BIT)
     // 6. 绘制,gl.TRIANGLES就相当于告诉WebGL，从缓冲区得第一个顶点开始，使顶点得着色器执行三次，用着三个点绘制一个三角形
-    gl.drawArrays(gl.TRIANGLES, 0, n);
+    gl.drawArrays(gl.TRIANGLES, 0, n)
 }
 
 // 设置顶点位置的函数
