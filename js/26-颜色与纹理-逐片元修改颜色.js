@@ -66,7 +66,7 @@ function initVertexBuffers(gl) {
     // 3.5 将缓冲区对象分配给a_Position变量（绑定对应的变量，应该就是类似与for循环分配点的位置信息给变量）
     var a_Position = gl.getAttribLocation(gl.program, "a_Position");
     gl.vertexAttribPointer(a_Position, 2, gl.FLOAT, false, 0, 0);
-    // 3.6 连接a_Position变量与分配给它的缓冲区对象,开启或激活attribute变量，是缓冲区对attribute变量的分配生效
+    // 3.6 连接a_Position变量与分配给它的缓冲区对象,开启或激活attribute变量，使缓冲区对attribute变量的分配生效
     gl.enableVertexAttribArray(a_Position);
 
 
