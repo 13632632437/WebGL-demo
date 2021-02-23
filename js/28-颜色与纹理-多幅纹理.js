@@ -29,25 +29,28 @@ var VSHADER_SOURCE =
 // 声明片元着色器
 var FSHADER_SOURCE =
     'precision mediump float;' +
-    'uniform sampler2D u_Sampler;' + 
-     /**
-      * u_Sampler取样器，接收纹理图像。从纹理图像获取纹素颜色的过程，输入纹理坐标，返回颜色值
-      * sampler2D表示纹理的一种特殊的、专用于纹理对象的数据类型。gl.TEXTURE_2D,所以uniform变量是sampler2D
-      * gl.TEXTURE_CUBE_MAP为samplerCube
-      */
+    'uniform sampler2D u_Sampler0;' +
+    'uniform sampler2D u_Sampler1;' +
+    /**
+     * u_Sampler取样器，接收纹理图像。从纹理图像获取纹素颜色的过程，输入纹理坐标，返回颜色值
+     * sampler2D表示纹理的一种特殊的、专用于纹理对象的数据类型。gl.TEXTURE_2D,所以uniform变量是sampler2D
+     * gl.TEXTURE_CUBE_MAP为samplerCube
+     */
     'varying vec2 v_TexCoord;' +
     'void main() {' +
-    ' gl_FragColor = texture2D(u_Sampler, v_TexCoord);' + // 片元着色器从纹理图像上获取纹素颜色，使用纹理坐标从纹理单元获取颜色
+    ' vec4 color0 = texture2D(u_Sampler0, v_TexCoord);' + // 片元着色器从纹理图像上获取纹素颜色，使用纹理坐标从纹理单元获取颜色
+    ' vec4 color1 = texture2D(u_Sampler1, v_TexCoord);' + // 片元着色器从纹理图像上获取纹素颜色，使用纹理坐标从纹理单元获取颜色
+    ' gl_FragColor = color0 * color1;' +
     '}'
-    /**
-     * texture2D(sampler2D sampler, vec2 coord); 从sampler指定的纹理上获取coord指定的纹理坐标处的像素颜色。
-     *  参数：
-     *      sampler     指定纹理单元编号
-     *      coord       指定纹理坐标
-     * 返回值：
-     *      纹理坐标处的颜色，格式有gl.texImage2D()的internalformat指定
-     * 
-     */
+/**
+ * texture2D(sampler2D sampler, vec2 coord); 从sampler指定的纹理上获取coord指定的纹理坐标处的像素颜色。
+ *  参数：
+ *      sampler     指定纹理单元编号
+ *      coord       指定纹理坐标
+ * 返回值：
+ *      纹理坐标处的颜色，格式有gl.texImage2D()的internalformat指定
+ * 
+ */
 // 主程序
 function main() {
     var canvas = $("#demo");
@@ -126,33 +129,48 @@ function initVertexBuffers(gl) {
 // 4. 准备待加载的纹理图像，并读取。
 function initTextures(gl, n) {
     // 创建纹理对象 
-    var texture = gl.createTexture();
-    if (!texture) {
+    var texture0 = gl.createTexture();
+    var texture1 = gl.createTexture();
+    if (!texture0 || !texture1) {
         console.log("创建纹理对象失败");
         return false
     }
     // 获取u_Sampler的存储位置
-    var u_Sampler = gl.getUniformLocation(gl.program, "u_Sampler");
-    if (!u_Sampler) {
+    var u_Sampler0 = gl.getUniformLocation(gl.program, "u_Sampler0");
+    var u_Sampler1 = gl.getUniformLocation(gl.program, "u_Sampler1");
+
+    if (!u_Sampler0 || !u_Sampler1) {
         console.log("获取u_Sampler存储地址失败");
         return false
     }
     // 创建一个image对象
-    var image = new Image();
+    var image0 = new Image();
+    var image1 = new Image();
     // 注册图像加载完成事件
-    image.onload = function () {
-        loadTexture(gl, n, texture, u_Sampler, image)
+    image0.onload = function () {
+        loadTexture(gl, n, texture0, u_Sampler0, image0, 0)
     }
-    image.src = "../img/yellowflower.jpg";
+    image1.onload = function () {
+        loadTexture(gl, n, texture1, u_Sampler1, image1, 1)
+    }
+    image0.src = "../img/sky.jpg";
+    image1.src = "../img/circle.gif";
     return true
 }
 
 // 5. 监听纹理图像的加载事件，一旦加载完成，就在WebGL系统中使用纹理。
-function loadTexture(gl, n, texture, u_Sampler, image) {
+var g_texUnit0 = false, g_texUnit1 = false;
+function loadTexture(gl, n, texture, u_Sampler, image, texUnit) {
     // 对纹理进行y轴反转，因为在图像中y轴是向下的(做上点为原点), 而纹理系统y轴是向上的(左下角为原点)
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, 1);
     // 开启0号纹理单元
-    gl.activeTexture(gl.TEXTURE0);
+    if (texUnit == 0) {
+        gl.activeTexture(gl.TEXTURE0);
+        g_texUnit0 = true;
+    } else {
+        gl.activeTexture(gl.TEXTURE1);
+        g_texUnit1 = true;
+    }
     // 绑定纹理对象
     gl.bindTexture(gl.TEXTURE_2D, texture);
     // 配置纹理参数
@@ -160,11 +178,13 @@ function loadTexture(gl, n, texture, u_Sampler, image) {
     // 配置纹理图像
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
     // 将纹理传递给着色器，0为纹理单元编号
-    gl.uniform1i(u_Sampler, 0);
+    gl.uniform1i(u_Sampler, texUnit);
     // 情况canvas
     gl.clear(gl.COLOR_BUFFER_BIT);
     // 绘制纹理矩形
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+    if (g_texUnit0 && g_texUnit1) {
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, n);
+    }
 }
 
 /**
@@ -234,17 +254,17 @@ function loadTexture(gl, n, texture, u_Sampler, image) {
  *      target              gl.TEXTURE_2D或gl.TEXTURE_BUVE_MAP
  *      level               0(该参数为金字塔纹理使用，暂不涉及)
  *      internalformat      图像的内部格式
- * 
+ *
  *      format              纹理数据的格式，同internalformat相同
  *                          JPG图片，该格式每个像素用RGB三个分量表示，所以为gl.RGB, PNG图像使用gl.RGBA, BMP为gl.RGB,
  *                          gl.LUMINANCE和gl.LUMINANCE_ALPHA通常用在灰度图像上
- * 
+ *
  *      type                纹理数据的类型
  *                      可选值：
  *                              gl.UNSIGEND_BYTE            无符号整型，每个颜色分量占据1字节
  *                              gl.UNSIGEND_SHORT_5_6_5     RGB: 每个分量分别占据5、6、5比特
  *                              gl.UNSIGEND_SHORT_4_4_4_4   RGBA: 每个分量分别占据4、4、4、4比特
  *                              gl.UNSIGEND_SHORT_5_5_5_1   RGBA: 每个分量各占据5比特，A分量占据1比特
- *                              
+ *
  *      image               包含纹理图像的Image对象
  */
