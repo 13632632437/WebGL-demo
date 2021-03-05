@@ -75,7 +75,7 @@ function initVertexBuffers(gl) {
  *  线条         gl.LINE_STRIP        一系列连接的线段，绘制在(v0,v1),(v1,v2)...处
  *  回路         gl.LINE_LOOP         一系列连接的线段，最后一个点和起始点相连
  *  三角形       gl.TRIANGLES         一系列单独的三角形，绘制在(v0,v1,v2),(v3,v4,v5)...处
- *  三角带       gl.TRIANGLES_STRIP   一系列条带状的三角形，绘制在(v0,v1,v2),(v2,v1,v3)...处，第二个三角形共用第一个三角形的一条边
- *  三角扇形     gl.TRIANGLES_FAN     一系列三角形组成的类似于扇形的图形
+ *  三角带       gl.TRIANGLE_STRIP    一系列条带状的三角形，绘制在(v0,v1,v2),(v2,v1,v3)...处，第二个三角形共用第一个三角形的一条边
+ *  三角扇形     gl.TRIANGLE_FAN      一系列三角形组成的类似于扇形的图形
  *
  */
