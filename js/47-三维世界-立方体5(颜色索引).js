@@ -53,7 +53,6 @@ function main() {
     viewMatrix.setLookAt(5.5, 2.5, 10.0, 0, 0, -2, 0, 1, 0);
     projMatrix.setPerspective(30, canvas[0].width / canvas[0].height, 1, 100)
     mvpMatrix.set(projMatrix).multiply(modalMatrix).multiply(viewMatrix);
-    // 第一次绘制右边三个三角形
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
     /**
      * gl.drawElements(mode, count, type, offset);
@@ -122,6 +121,7 @@ function initVertexBuffers(gl) {
         19, 16, 17, 19, 17, 18,
         20, 23, 22, 20, 22, 21
     ])
+    // 采用不同的颜色,问题:如果所有的面都是用同一个颜色,则会看起来像一个不规则的平面图形,失去立体效果(实际还是立方体),将会在下一章光照解决该问题
     var colors = new Float32Array([
         0.8, 0.6, 0.1, 0.8, 0.6, 0.1, 0.8, 0.6, 0.1, 0.8, 0.6, 0.1, 0.9, 0.2, 0.2, 0.9, 0.2, 0.2, 0.9, 0.2, 0.2,
         0.9, 0.2, 0.2, 0.5, 0.2, 0.5, 0.5, 0.2, 0.5, 0.5, 0.2, 0.5, 0.5, 0.2, 0.5, 0.4, 0.5, 0.6, 0.4, 0.5, 0.6,
