@@ -1,4 +1,8 @@
-
+/**
+ * 环境反射光颜色 = 入射光颜色 * 表面基底色
+ * 当环境反射和漫反射同时存在时
+         表面的反射光颜色= 漫反射光颜色 + 环境反射光颜色
+ */
 var VSHADER_SOURCE =
     "attribute vec4 a_Position;" +         // 顶点数据
     "attribute vec4 a_Color;" +            // 颜色数据
@@ -8,6 +12,7 @@ var VSHADER_SOURCE =
     "uniform vec3 u_LightColor;" +         // 光照颜色 
     "uniform vec3 u_LightDirection;" +     // 归一化的世界坐标(光照的方向)即长度|u_LightDirection|为1.0
     'uniform mat4 u_NormalMatrix;' +       // 法向量旋转矩阵
+    'uniform vec3 u_AmbientLight;' +       // 环境光颜色
     "void main() {" +
     // 漫反射的颜色 = 入射光的颜色 * 表面基底色 * (入射光线(归一化) * 法向量(归一化))
     // 对法向量归一化,normalize()为GLSL ES内置的函数，a_Normal为vec4类型，前三个分量是法向量，故而需要转化。
@@ -18,8 +23,10 @@ var VSHADER_SOURCE =
     // 计算漫反射光的颜色a_Color为vec4类型，透明度与颜色计算无关故转为vec3
     "vec3 diffuse = u_LightColor * vec3(a_Color) * nDotL;" +
     "gl_Position = u_MvpMatrix * a_Position;" +
+    // 计算环境光产生得反射光颜色
+    "vec3 ambient = u_AmbientLight * a_Color.rgb;" +
     //  还原为vec4，补上透明度rgba中的a
-    "v_Color = vec4(diffuse,a_Color.a);" +
+    "v_Color = vec4(diffuse + ambient,a_Color.a);" +
     "}"
 
 var FSHADER_SOURCE =
@@ -59,7 +66,8 @@ function main() {
     var u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
     var u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
     var u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
-    if (!u_LightColor || !u_LightDirection || !u_NormalMatrix) return
+    var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
+    if (!u_LightColor || !u_LightDirection || !u_NormalMatrix || !u_AmbientLight) return
     var lightDirection = new Vector3([3, 2.5, 8.0])
 
     lightDirection.normalize();
@@ -67,6 +75,9 @@ function main() {
     gl.uniform3fv(u_LightDirection, lightDirection.elements);
     //  设置光照颜色(白色)
     gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+    //  设置环境光颜色
+    gl.uniform3f(u_AmbientLight, 0.4,0.4,0.4);
+
     var vpMatrix = new Matrix4();    // 视图投影矩阵
     var modalMatrix = new Matrix4(); // 模型矩阵
     var mvpMatrix = new Matrix4();   // 视图模型投影矩阵 = 视图投影矩阵 * 模型矩阵
@@ -86,19 +97,16 @@ function main() {
         /**
          * 魔法矩阵: 逆转置矩阵
          *  对顶点变换得矩阵称为模型矩阵
-         *  1. 平移不会改变法向量，应为平移不会改变物体的方向
-         *  2. 旋转会改变法向量，因为旋转改变可物体的方向
-         *  3. 缩放对法向量的影响较为复杂
          *  那么如何计算变换后得法向量？
          *  只需要将变换之前得法向量矩阵乘以模型矩阵得逆转置矩阵即可，所谓逆转置矩阵，就是逆矩阵（与原矩阵相乘等于单位矩阵得矩阵）得转置（列变为行）
          */
-        normalMatrix.setInverseOf(modalMatrix);                             // 使自身成为矩阵modalMatrix的逆矩阵。
-        normalMatrix.transpose();                                           // 对自身进行转置操作，并将自身设为转置后的结果。
+        normalMatrix.setInverseOf(modalMatrix); // 使自身成为矩阵modalMatrix的逆矩阵。
+        normalMatrix.transpose(); // 对自身进行转置操作，并将自身设为转置后的结果。
         gl.uniformMatrix4fv(u_NormalMatrix, false, normalMatrix.elements);
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-        requestAnimationFrame(tick);
+        requestAnimationFrame(tick)
     }
     tick()
 
@@ -189,47 +197,44 @@ function animate(angle) {
     return newAngle %= 360
 
 }
-
 /**
-    http://www.songho.ca/opengl/gl_normaltransform.html
-
-    任意一点的矢量v,与法向量n，及其夹角p(90°,垂直)
-    cos p = 0
-    n  *v = |n|*|v|*cos p = 0
-    则
-    n * v = 0;
-    即
-    (nx,ny,nz,nw)*(x,y,z,w)=0
-    (nx * x) + (ny * y) + (nz * z) + (nw * w) = 0
-    等价的矩阵运算为：
-
-                        x
-    (nx,ny,nz,nw) *   [ y ] = 0
-                        z
-                        w
-    在两者之间插入GL_MODELVIEW矩阵M-1M(矩阵乘以逆矩阵的结果为单位矩阵，不影响结果)，得到法向量变换公式;
-
-                                    x
-    (nx,ny,nz,nw) * (M^-1 * M ) * [ y ] = 0
-                                    z
-                                    w
-
-
-                                    x
-    ((nx,ny,nz,nw) * M^-1) * (M * [ y ]) = 0
-                                    z
-                                    w                          
-    如你所见，上面等式的右边部分M * v将顶点转换为eye space,左边的部分nT(n的转置) *  M^-1是eye space的法向量，因为平面方程也进行了变换。
-    它的意思是“转换后的顶点视图矩阵Mv，位于eye space中转换后的平面法向变换上。
-    因此，用GL_MODELVIEW矩阵M将物体空间的法线转换为eye space为
-
-      nx eye 
-    [ ny eye ] = (nx obj,ny obj,nz obj,nw obj) M^-1
-      nz eye 
-      nw eye 
-    将前乘法转换为后乘法形式，得到:
-      nx eye                nx obj 
-    [ ny eye ] = (M^-1)^T [ ny obj ]
-      nz eye                nz obj 
-      nw eye                nw obj 
+ * 法向量变换矩阵为模型矩阵的逆转置矩阵在次推导
+ * 设变换前的法向量 n, 正确变换法向量的变换矩阵 M'，变换后的法向量n'
+ * 
+ * 式1 ===> n' = M' * n
+ * 
+ * 设平面上一向量 s，s向量的变换矩阵为 M，变换后的向量为 s'
+ * 
+ * 式2 ===>s' = M * s
+ * 
+ * 因为法向量垂直于平面上的向量，所以：
+ * 
+ * 式3 ===> s' .  n' = |s'| |n'| * cos夹角（90°，为0） = 0
+ * 
+ * 将12式带入3得：
+ * 式4===>  (M' * n) . ( M * s) = 0 
+ * 又因为
+ *  a . b  = |a||b|cos夹角 = (x1x2+y1y2+z1z2) = a^T * b;
+ * 
+ * 变换式4得：
+ * 式5===> (M' * n)^T * ( M * s) = 0 
+ * 
+ * 
+ * 又(a*b)^T = a^T * b^T,得
+ * 式6===> n^T * M'^T  *  M * s  = 0 
+ * 
+ * 又n和s垂直，变换前得法向量和平面上的向量垂直，得
+ * n . s = 0 ===> n^T * s = 0 (a . b  = |a||b|cos夹角 = (x1x2+y1y2+z1z2) = a^T * b;)
+ * 
+ * 比较式6
+ * n^T * M'^T  *  M * s  = 0 
+ * n^T * s = 0
+ * 
+ * 可得n^T * M'^T  *  M  =  n^T
+ * 
+ * ===>  M'^T  *  M = I(单位矩阵)
+ * 
+ * ===> M'^T = M^-1
+ * 
+ * ===> M'= (M^-1)^T 即法向量的变换矩阵为模型矩阵的逆转置矩阵
  */
