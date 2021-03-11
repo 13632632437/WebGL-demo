@@ -60,7 +60,7 @@ function main() {
      *  参数：
      *      mode        指定绘制的方式：gl.POINTS\gl.LINES\gl.LINE_STRIP\gl.LINE_LOOP\gl.TRIANGLES\gl.TRIANGLE_STRIP\gl.TRIANGLE_FAN
      *      count       指定绘制顶点的个数（整型数）
-     *      type        指定索引值数据类型gl.UNSIGNED_BYTE\gl.UNSIGNED_SHORT
+     *      type        指定索引值数据类型gl.UNSIGNED_BYTE（无符号字节）\gl.UNSIGNED_SHORT（无符号短整形）
      *      offset      指定索引数组中开始绘制的位置，以字节为单位
      * 错误： 
      *      INVALID_ENUM       mode错误

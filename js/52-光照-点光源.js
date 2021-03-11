@@ -1,7 +1,7 @@
 /**
- * 环境反射光颜色 = 入射光颜色 * 表面基底色
- * 当环境反射和漫反射同时存在时
-         表面的反射光颜色= 漫反射光颜色 + 环境反射光颜色
+ * 点光源时模型上每一点的光照方向都是不一样的
+ * 光线向量由光的位置指向物体上点的位置，即得光线向量 = 光的位置 - 点得位置（变换矩阵*原始位置）
+ * 故着色器需要点得位置和光源位置
  */
 var VSHADER_SOURCE =
     "attribute vec4 a_Position;" +         // 顶点数据
@@ -10,16 +10,22 @@ var VSHADER_SOURCE =
     "uniform mat4 u_MvpMatrix;" +          // 视图模型投影矩阵
     "attribute vec4 a_Normal;" +           // 法向量   
     "uniform vec3 u_LightColor;" +         // 光照颜色 
-    "uniform vec3 u_LightDirection;" +     // 归一化的世界坐标(光照的方向)即长度|u_LightDirection|为1.0
+    // "uniform vec3 u_LightDirection;" +     // 归一化的世界坐标(光照的方向)即长度|u_LightDirection|为1.0
     'uniform mat4 u_NormalMatrix;' +       // 法向量旋转矩阵
     'uniform vec3 u_AmbientLight;' +       // 环境光颜色
+    'uniform vec3 u_LightPosition;' +      // 光源位置
+    'uniform mat4 u_ModalMatrix;' +          // 模型矩阵
     "void main() {" +
     // 漫反射的颜色 = 入射光的颜色 * 表面基底色 * (入射光线(归一化) * 法向量(归一化))
     // 对法向量归一化,normalize()为GLSL ES内置的函数，a_Normal为vec4类型，前三个分量是法向量，故而需要转化。
     "vec4 normal = u_NormalMatrix * a_Normal ;" +
+    // 计算变换后点得位置
+    "vec4 vertexPosition = u_ModalMatrix * a_Position;" +
+    // 计算光线方向
+    "vec3 lightDirection = u_LightPosition - vec3(vertexPosition);" +
     // 计算入射光线和法向量的点积,dot()GLSL ES内置计算点击函数，可能会小于0，max取点积和0.0的最大值，即结果须大于等于0
     // 光照照到背面，角度大于90°，点积就为负数
-    "float nDotL = max(dot(u_LightDirection,normalize(normal.xyz)),0.0);" +
+    "float nDotL = max(dot(normalize(lightDirection),normalize(normal.xyz)),0.0);" +
     // 计算漫反射光的颜色a_Color为vec4类型，透明度与颜色计算无关故转为vec3
     "vec3 diffuse = u_LightColor * vec3(a_Color) * nDotL;" +
     "gl_Position = u_MvpMatrix * a_Position;" +
@@ -59,29 +65,28 @@ function main() {
         console.log('视图模型投影矩阵u_MvpMatrix变量存储地址获取失败');
         return;
     }
-    gl.clearColor(0.1, 0.5, 0.0, 1.0);
+    gl.clearColor(0.1, 0.5, 0.5, 1.0);
     gl.enable(gl.DEPTH_TEST); // 消除隐藏面
 
 
     var u_LightColor = gl.getUniformLocation(gl.program, "u_LightColor");
-    var u_LightDirection = gl.getUniformLocation(gl.program, "u_LightDirection");
+    var u_LightPosition = gl.getUniformLocation(gl.program, "u_LightPosition");
     var u_NormalMatrix = gl.getUniformLocation(gl.program, 'u_NormalMatrix');
     var u_AmbientLight = gl.getUniformLocation(gl.program, 'u_AmbientLight');
-    if (!u_LightColor || !u_LightDirection || !u_NormalMatrix || !u_AmbientLight) return
-    var lightDirection = new Vector3([0, 0.0, 10.0])
+    var u_ModalMatrix = gl.getUniformLocation(gl.program, 'u_ModalMatrix');
+    if (!u_LightColor || !u_LightPosition || !u_NormalMatrix || !u_AmbientLight || !u_ModalMatrix) return
 
-    lightDirection.normalize();
-    //  设置光照方向
-    gl.uniform3fv(u_LightDirection, lightDirection.elements);
+    //  设置光源位置
+    gl.uniform3f(u_LightPosition, 5.0,0.0,4.0);
     //  设置光照颜色(白色)
-    gl.uniform3f(u_LightColor, 1.0, 1.0, 1.0);
+    gl.uniform3f(u_LightColor, 1.0, 0.0, 0.0);
     //  设置环境光颜色
-    gl.uniform3f(u_AmbientLight, 1.0,0,0);
+    gl.uniform3f(u_AmbientLight, 0.5,0.0,0.0);
 
     var vpMatrix = new Matrix4();    // 视图投影矩阵
     var modalMatrix = new Matrix4(); // 模型矩阵
     var mvpMatrix = new Matrix4();   // 视图模型投影矩阵 = 视图投影矩阵 * 模型矩阵
-    var currentAngle = 0.0;// 当前旋转角度
+    var currentAngle = 78.0;// 当前旋转角度
     var normalMatrix = new Matrix4(); // 法线的变换矩阵
     vpMatrix.setPerspective(30, canvas[0].width / canvas[0].height, 1, 100);
     vpMatrix.lookAt(2, 1, 8.0, 0, 0, -2, 0, 1, 0);
@@ -90,10 +95,10 @@ function main() {
     var tick = function () {
         currentAngle = animate(currentAngle);
         // 旋转后的模型矩阵
-        modalMatrix.setRotate(-currentAngle, 0.5, 1, 0);
+        modalMatrix.setRotate(-currentAngle, 0, 1, 1);
+        gl.uniformMatrix4fv(u_ModalMatrix, false, modalMatrix.elements);
         mvpMatrix.set(vpMatrix).multiply(modalMatrix);
-        gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements)
-        // 此处计算法向量的旋转暂时不懂
+        gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
         /**
          * 魔法矩阵: 逆转置矩阵
          *  对顶点变换得矩阵称为模型矩阵
@@ -106,7 +111,7 @@ function main() {
 
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.drawElements(gl.TRIANGLES, n, gl.UNSIGNED_BYTE, 0);
-        requestAnimationFrame(tick)
+        requestAnimationFrame(tick);
     }
     tick()
 
