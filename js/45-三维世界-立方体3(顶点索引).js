@@ -53,7 +53,6 @@ function main() {
     viewMatrix.setLookAt(5.5, 2.5, 10.0, 0, 0, -2, 0, 1, 0);
     projMatrix.setPerspective(30, canvas[0].width / canvas[0].height, 1, 100)
     mvpMatrix.set(projMatrix).multiply(modalMatrix).multiply(viewMatrix);
-    // 第一次绘制右边三个三角形
     gl.uniformMatrix4fv(u_MvpMatrix, false, mvpMatrix.elements);
     /**
      * gl.drawElements(mode, count, type, offset);

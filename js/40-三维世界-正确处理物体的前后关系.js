@@ -87,7 +87,7 @@ function initVertexBuffers(gl) {
          *      gl.enable(gl.DEPTH_TEST)
          *            gl.enable(cap)
          *            参数：
-         *              cap     gl.DEPATH_TEST          隐藏面消除
+         *              cap     gl.DEPTH_TEST          隐藏面消除
          *                      gl.BLEND                混合
          *                      gl.POLYGON_OFFSET_FILL  多边形位移
          * 
