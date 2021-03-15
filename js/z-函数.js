@@ -53,7 +53,7 @@
  *                  null     创建缓冲区失败 
  *   
  * 9. 绑定缓冲区对象
- *      gl.bingBuffer(target，buffer)
+ *      gl.bindBuffer(target，buffer)
  *          参数：
  *                 target     可选值glARRAY_BUFFER(表示缓冲区对象包含了顶点的数据)、gl.ELEMENT_ARRAY_BUFFER(表述缓冲区中包含老人顶点的索引值)   
  *                 buffer     指定之前由gl.createBuffer()返回的待绑定的缓冲区对象
