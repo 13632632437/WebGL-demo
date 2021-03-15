@@ -8,11 +8,12 @@
  * 深度缓冲区：(1.0)                gl.clearDepth(depth)
  * 模板缓冲区：0                    gl.clearStencil(s)
  *
- * 2. gl.clear(gl.COLOR_BUFFER_BIT) 清空canvas
- * WebGL中的gl.clear()方法继承自OpenGL，基于多基本缓冲区模型
- * 清空绘图区域，实际上是清空颜色缓冲区，传递gl.COLOR_BUFFER_BIT就是告诉WebGL清空颜色缓冲区
- * 缓冲区：颜色缓冲区(gl.COLOR_BUFFER_BIT)、深度缓冲区(gl.DEPTH_BUFFER_BIT)、模板缓冲区(gl.STENCIL_BUFFER_BIT)
- *
+ * 2. gl.uniformMatrix4fv(location, Transpose, array); 4阶矩阵，v表示向着色器传递多个数据值
+ *  参数： 
+ *  location    uniform变量的存储位置
+ *  Transpose   默认为false,是否转置矩阵，即交换矩阵的行和列，在WebGL没有实现矩阵转置，所以为false
+ *  array       待传输的类型化数组，4*4矩阵按列主序存储在其中
+ * 
  * 3. gl.enable(cap)
  *    参数：
  *      cap     gl.DEPTH_TEST          隐藏面消除
@@ -87,4 +88,15 @@
  *      gl.enableVertexAttribArray(location) 为了使顶点着色器能够访问缓冲区内的数据，此时缓冲区对象和attribute变量之间的连接就真正的建立起来了
  *          参数：
  *                  location    指定attribute变量的存储位置
+ * 
+ * 13. gl.drawElements(mode, count, type, offset);
+ * 执行着色器，按照mode参数指定的方式，根据绑定到gl.ELEMENT_ARRAY_BUFFER的缓冲区的顶点索引绘制图形。
+ *  参数：
+ *      mode        指定绘制的方式：gl.POINTS\gl.LINES\gl.LINE_STRIP\gl.LINE_LOOP\gl.TRIANGLES\gl.TRIANGLE_STRIP\gl.TRIANGLE_FAN
+ *      count       指定绘制顶点的个数（整型数）
+ *      type        指定索引值数据类型gl.UNSIGNED_BYTE\gl.UNSIGNED_SHORT
+ *      offset      指定索引数组中开始绘制的位置，以字节为单位
+ * 错误： 
+ *      INVALID_ENUM       mode错误
+ *      invalid_value      count\offset错误
  */

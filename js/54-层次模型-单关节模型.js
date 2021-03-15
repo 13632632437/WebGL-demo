@@ -1,3 +1,20 @@
+/**
+ * 1.  获取WebGL上下文
+ * 2.  初始化着色器
+ * 3.  设置顶点信息
+ *      3.1 顶点位置
+ *      3.2 法向量
+ *      3.3 绘制顶点索引
+ *      3.4 创建顶点，法向量缓冲区
+ *      3.5 创建索引缓冲区
+ * 4.  清空canvas
+ * 5.  消除隐藏面
+ * 6.  清除颜色和深度缓冲区
+ * 7.  设置视图矩阵
+ * 8.  设置投影矩阵
+ * 9.  设置模型矩阵
+ * 10. 绘制
+ */
 var VSHADER_SOURCE =
     'attribute vec4 a_Position;\n' +
     'attribute vec4 a_Normal;\n' +
@@ -62,8 +79,8 @@ var g_modelMatrix = new Matrix4();
 var g_normalMatrix = new Matrix4();
 var g_mvpMatrix = new Matrix4();
 var g_step = 3.0;
-var g_currentAngle = 0.0;
-var g_currentAngle1 = 0.0;
+var g_currentAngle = 45.0;
+var g_currentAngle1 = 90.0;
 
 function draw(gl, n, viewProjMatrix, u_MvpMatrix, u_NormalMatrix) {
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -103,7 +120,7 @@ function keydown(e, gl, n, viewProjMatrix, u_MvpMatrix, u_NormalMatrix) {
         case 37:
             g_currentAngle += g_step
             break;
-        default: return; // Skip drawing at no effective action
+        default: return;
     }
     draw(gl, n, viewProjMatrix, u_MvpMatrix, u_NormalMatrix);
 }
@@ -209,20 +226,3 @@ function initBuffers(gl, data, a_attribute) {
     gl.enableVertexAttribArray(a_Attribute);
     return true
 }
-/**
- * 1.  获取WebGL上下文
- * 2.  初始化着色器
- * 3.  设置顶点信息
- *      3.1 顶点位置
- *      3.2 法向量
- *      3.3 绘制顶点索引
- *      3.4 创建顶点，法向量缓冲区
- *      3.5 创建索引缓冲区
- * 4.  清空canvas
- * 5.  消除隐藏面
- * 6.  清除颜色和深度缓冲区
- * 7.  设置视图矩阵
- * 8.  设置投影矩阵
- * 9.  设置模型矩阵
- * 10. 绘制
- */
