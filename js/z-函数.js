@@ -99,4 +99,23 @@
  * 错误： 
  *      INVALID_ENUM       mode错误
  *      invalid_value      count\offset错误
+ * 
+ * 14. gl.createShader(type)
+ * 创建由type指定的着色器对象
+ * 参数：
+ *      type        指定创建的着色器的类型。gl.VERTEX_SHADER表示顶点着色器，gl.FRAGMENT_SHADER表示片元着色器
+ * 返回值：
+ *      non-null    创建的着色器
+ *      null        创建失败
+ * 错误:
+ *      INVALID_ENUM type参数错误，不是上述其中之一
+ * 
+ * 15. gl.deleteShader(shader)
+ * 删除shader指定的着色器对象
+ * 参数：
+ *      shader      待删除的着色器对象
+ * 注意：已经使用的着色器不会立马删除，而是等他使用结束后删除
+ * 
+ * 16. gl.shaderSource(shader,source)
+ * 将source指定的字符串形式的代码传入shader
  */
