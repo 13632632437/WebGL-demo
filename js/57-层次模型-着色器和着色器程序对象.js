@@ -42,10 +42,45 @@ function main() {
      *  着色器对象：管理一个顶点着色器或一个片元着色器，每一个着色器都有一个着色器对象
      *  程序对象：管理着色器对象的容器，一个程序对象必须包含一个顶点着色器和一个片元着色器
      */
-    if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
-        console.log('Failed to intialize shaders.');
-        return;
+    //  1. 创建着色器对象gl.createShader()
+    var vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    var fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+    if (!vertexShader) {
+        console.log("顶点着色器创建失败");
+        return
     }
+    if (!fragmentShader) {
+        console.log("片元着色器创建失败");
+        return
+    }
+    //  2. 向着色器对象中填充着色器程序的源代码gl.shaderSource();
+    gl.shaderSource(vertexShader, VSHADER_SOURCE);
+    gl.shaderSource(fragmentShader, FSHADER_SOURCE);
+    //  3. 编译着色器gl.compileShader()
+    gl.compileShader(vertexShader);
+    gl.compileShader(fragmentShader);
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+        console.log("顶点着色器编译失败");
+        return
+    }
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+        console.log("片元着色器编译失败");
+        return
+    }
+    //  4. 创建程序对象gl.createProgram()
+    var program = gl.createProgram();
+    //  5. 为程序对象分配着色器gl.attachShader()
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    //  6. 连接程序对象gl.linkProgram()
+    gl.linkProgram(program)
+    //  7. 使用程序对象gl.useProgram()
+    gl.useProgram(program);
+    gl.program = program;
+    // if (!initShaders(gl, VSHADER_SOURCE, FSHADER_SOURCE)) {
+    //     console.log('Failed to intialize shaders.');
+    //     return;
+    // }
     var n = initVertexBuffers(gl);
     if (n < 0) {
         console.log('Failed to set the vertex information');
@@ -63,7 +98,6 @@ function main() {
     var viewProjMatrix = new Matrix4();
     viewProjMatrix.setPerspective(50.0, canvas.width / canvas.height, 1.0, 100.0);
     viewProjMatrix.lookAt(20.0, 10.0, 30.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
-
     draw(gl, n, viewProjMatrix, a_Position, u_MvpMatrix, u_NormalMatrix);
     document.onkeydown = function (ev) { keydown(ev, gl, n, viewProjMatrix, a_Position, u_MvpMatrix, u_NormalMatrix); };
 }

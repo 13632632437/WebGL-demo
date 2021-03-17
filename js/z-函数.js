@@ -16,7 +16,7 @@
  * 
  * 3. gl.enable(cap)
  *    参数：
- *      cap     gl.DEPTH_TEST          隐藏面消除
+ *      cap     gl.DEPTH_TEST           隐藏面消除
  *              gl.BLEND                混合
  *              gl.POLYGON_OFFSET_FILL  多边形位移
  *
@@ -117,5 +117,81 @@
  * 注意：已经使用的着色器不会立马删除，而是等他使用结束后删除
  * 
  * 16. gl.shaderSource(shader,source)
- * 将source指定的字符串形式的代码传入shader
+ * 将source指定的字符串形式的代码传入shader指定的着色器。如果之前已经想shader传入过代码了，旧的代码将会被替换掉。
+ * 参数：
+ *      shader      指定要传入代码的着色器对象
+ *      source      指定字符串形式的代码
+ * 
+ * 17. gl.compileShader(shader)
+ * 编译shader指定的着色器中的源代码，编译为WebGL系统真正使用的二进制可执行程序
+ * 参数：
+ *      shader      待编译的着色器
+ * 
+ * 18. gl.getShaderParameter(shader,pname)
+ * 获取shader指定的着色器中，pname指定的参数信息
+ * 参数：
+ *      shader      指定待获取参数的着色器
+ *      pname       指定获取参数的类型
+ *                      gl.SHADER_TYPE、gl.DELETE_STATUS、gl.COMPILE_STATUS
+ * 返回值：
+ *      pname不同返回不同的值
+ *      gl.SHADER_TYPE      返回是顶点着色器(gl.VERTEX_SHADER)还是片元着色器(gl.FRAGMENT_SHADER)
+ *      gl.DELETE_STATUS    返回着色器是否被删除成功(true\false)
+ *      gl.COMPILE_STATUS   返回着色器是否被编译成功(true\false)
+ * 错误：INVALID_ENUM       pname的值无效
+ * 
+ * 19. gl.getShaderInfoLog(shader)
+ * 获取shader指定的着色器的信息日志
+ * 参数：
+ *      shader          指定待获取信息日志的着色器
+ * 返回值：
+ *      non-null        包含日志信息的字符串
+ *      null            没有编译错误
+ * 
+ * 20. gl.createProgram()
+ * 创建程序对象，程序对象包含顶点着色器和片元着色器，gelAttribLocation函数的第一个参数就是此处创建的程序对象
+ * 参数：无
+ * 返回值：
+ *      non-null        创建的程序对象
+ *      null            创建失败
+ * 
+ * 21.gl.deleteProgram(program)
+ * 删除propgram指定的程序对象，如果该程序对象正在被使用，则不立即删除，而是等他不在被使用后在删除
+ * 参数：
+ *      program     指定待删除的程序对象
+ * 
+ * 22. gl.attachShader(program,shader)
+ * 将shader指定的着色器对象分配给program指定的程序对象
+ * 参数：
+ *      program         指定程序对象    
+ *      shader          指定着色器对象（可以是没有着色器代码的空着色器对象）
+ * 
+ * 23. gl.detachShader(program,shader)
+ * 取消shader指定的着色器对象对program指定的程序对象的分配
+ * 参数：
+ *      program         指定程序对象
+ *      shader          指定着色器对象
+ * 
+ * 24. gl.linkProgram(program)
+ * 连接program指定的程序对象中的着色器
+ * 参数：
+ *      program     指定程序对象
+ * 作用：保证顶点着色器和片元着色器的varying变量同名同类型且一一对应、顶点着色器对varying变量赋值了、顶点
+ * 着色器和片元着色器同名的uniform变量也同类型、变量的个数没有超过着色器上限
+ * 
+ * 25. gl.getProgramParameter(program,pname)
+ * 获取program指定的程序对象中pname指定的参数信息
+ * 1. 程序是否被删除
+ * 2. 程序是否连接成功
+ * 3. 程序是否验证通过
+ * 4. 分配给程序的着色器数量
+ * 5. 顶点着色器中attribute变量的数量
+ * 6. 程序中uniform变量的数量
+ * 
+ * 26. gl.getProgramInfoLog(program)
+ * 获取program指定的程序对象的信息日志
+ * 
+ * 27. gl.useProgram(program)
+ * 告知WebGL系统绘制时使用program指定的程序对象
+ * 
  */
