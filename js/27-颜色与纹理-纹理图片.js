@@ -29,25 +29,25 @@ var VSHADER_SOURCE =
 // 声明片元着色器
 var FSHADER_SOURCE =
     'precision mediump float;' +
-    'uniform sampler2D u_Sampler;' + 
-     /**
-      * u_Sampler取样器，接收纹理图像。从纹理图像获取纹素颜色的过程，输入纹理坐标，返回颜色值
-      * sampler2D表示纹理的一种特殊的、专用于纹理对象的数据类型。gl.TEXTURE_2D,所以uniform变量是sampler2D
-      * gl.TEXTURE_CUBE_MAP为samplerCube
-      */
+    'uniform sampler2D u_Sampler;' +
+    /**
+     * u_Sampler取样器，接收纹理图像。从纹理图像获取纹素颜色的过程，输入纹理坐标，返回颜色值
+     * sampler2D表示纹理的一种特殊的、专用于纹理对象的数据类型。gl.TEXTURE_2D,所以uniform变量是sampler2D
+     * gl.TEXTURE_CUBE_MAP为samplerCube
+     */
     'varying vec2 v_TexCoord;' +
     'void main() {' +
     ' gl_FragColor = texture2D(u_Sampler, v_TexCoord);' + // 片元着色器从纹理图像上获取纹素颜色，使用纹理坐标从纹理单元获取颜色
     '}'
-    /**
-     * texture2D(sampler2D sampler, vec2 coord); 从sampler指定的纹理上获取coord指定的纹理坐标处的像素颜色。
-     *  参数：
-     *      sampler     指定纹理单元编号
-     *      coord       指定纹理坐标
-     * 返回值：
-     *      纹理坐标处的颜色，格式有gl.texImage2D()的internalformat指定
-     * 
-     */
+/**
+ * texture2D(sampler2D sampler, vec2 coord); 从sampler指定的纹理上获取coord指定的纹理坐标处的像素颜色。
+ *  参数：
+ *      sampler     指定纹理单元编号
+ *      coord       指定纹理坐标
+ * 返回值：
+ *      纹理坐标处的颜色，格式有gl.texImage2D()的internalformat指定
+ * 
+ */
 // 主程序
 function main() {
     var canvas = $("#demo");
@@ -234,17 +234,17 @@ function loadTexture(gl, n, texture, u_Sampler, image) {
  *      target              gl.TEXTURE_2D或gl.TEXTURE_BUVE_MAP
  *      level               0(该参数为金字塔纹理使用，暂不涉及)
  *      internalformat      图像的内部格式
- * 
+ *
  *      format              纹理数据的格式，同internalformat相同
  *                          JPG图片，该格式每个像素用RGB三个分量表示，所以为gl.RGB, PNG图像使用gl.RGBA, BMP为gl.RGB,
  *                          gl.LUMINANCE和gl.LUMINANCE_ALPHA通常用在灰度图像上
- * 
+ *
  *      type                纹理数据的类型
  *                      可选值：
  *                              gl.UNSIGEND_BYTE            无符号整型，每个颜色分量占据1字节
  *                              gl.UNSIGEND_SHORT_5_6_5     RGB: 每个分量分别占据5、6、5比特
  *                              gl.UNSIGEND_SHORT_4_4_4_4   RGBA: 每个分量分别占据4、4、4、4比特
  *                              gl.UNSIGEND_SHORT_5_5_5_1   RGBA: 每个分量各占据5比特，A分量占据1比特
- *                              
+ *
  *      image               包含纹理图像的Image对象
  */
