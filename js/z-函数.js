@@ -194,4 +194,13 @@
  * 27. gl.useProgram(program)
  * 告知WebGL系统绘制时使用program指定的程序对象
  * 
+ * 28. gl.readPixels(x,y,width,height,format,type,pixels)
+ * 从颜色缓冲区中读取有x、y、width、height参数指定的矩形块中的所有像素值，并保存在pixels中指定的数组中。
+ * 参数：
+ *  x、y            指定颜色缓冲区中矩形块左上角的坐标，通道hi也是读取的第一个像素的坐标
+ *  width、height   指定矩形块的宽度和高度，以像素为单位
+ *  format          指定像素值的颜色格式，必须为gl.RGBA
+ *  type            指定像素的数据格式，必须为gl.UNSIGEND_BYTE
+ *  pixels          指定用来接收像素值数据的Unit8Array类型化数组
+ * 
  */
